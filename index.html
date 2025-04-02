@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OVERWATCH 2 UI TEXT VIEWER</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <style>
+      @font-face {
+        font-family: "EkachonRegular";
+        src: url("static/fonts/EkachonRegular.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "CustomFont2";
+        src: url("static/fonts/font2.ttf") format("truetype");
+      }
+      /* Global body styling with gradient background */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #ee8b20, #3d3d3d);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      /* Main white container styling */
+      .container {
+        background-color: white;
+        border-radius: 20px;
+        padding: 40px 50px 70px;
+        margin: 20px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      /* Header styling */
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 30px 20px;
+      }
+      header h1 {
+        font-size: 45px;
+        font-weight: bold;
+        color: #db872c;
+        margin: 0;
+        letter-spacing: 2px;
+      }
+      /* Controller section styling */
+      .control-bar {
+        background-color: white;
+        color: black;
+        margin-bottom: 40px;
+        padding: 30px;
+        border: 3px solid black;
+        border-radius: 25px;
+        text-align: center;
+      }
+      .control-bar .step-label {
+        font-size: 22px;
+        font-weight: bold;
+        margin: 10px 0;
+        text-align: left;
+        width: 100%;
+      }
+      .control-bar .step-label.shortcut {
+        margin-bottom: 20px;
+      }
+      .control-bar #font-selector {
+        font-size: 16px;
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        background-color: white;
+        color: black;
+        border: 1px solid #ccc;
+      }
+      .control-bar #selected-font {
+        font-size: 18px;
+        font-weight: bold;
+        color: #db872c;
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      /* Bookmarks container styling (with Group 4 bookmark included) */
+      .control-bar .bookmarks {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+      .control-bar .bookmarks button {
+        flex: 0 0 150px;
+        padding: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        background-color: #2d2d2d;
+        color: white;
+        border: 1px solid #2d2d2d;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .control-bar .bookmarks button:hover {
+        background-color: #1a1a1a;
+      }
+      /* Divider styling */
+      .group-divider {
+        border: none;
+        border-bottom: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      .canvas-group {
+        margin-bottom: 40px;
+      }
+      .canvas-item {
+        padding: 10px;
+      }
+      /* Note styling */
+      .note {
+        background-color: #ffe0b2;
+        color: #555;
+        padding: 5px 10px;
+        border-radius: 10px;
+        display: inline-block;
+        font-size: 14px;
+        margin: 10px auto;
+      }
+      /* Textarea styling */
+      textarea {
+        font-size: 18px;
+        display: block;
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+        margin: 20px auto;
+        resize: none;
+        overflow: hidden;
+        box-sizing: border-box;
+        font-family: "EkachonRegular";
+        /* Updated all placeholder texts to "Type here..." */
+        placeholder: "Type here...";
+      }
+      /* Canvas styling */
+      canvas {
+        border: 2px solid black;
+        margin: 25px auto 0;
+        display: block;
+      }
+      /* Fixed buttons styling */
+      #clear-button, #back-to-top {
+        position: fixed;
+        padding: 15px 30px;
+        font-size: 18px;
+        font-weight: bold;
+        background-color: #353535;
+        color: white;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      #clear-button:hover, #back-to-top:hover {
+        background-color: #2d2d2d;
+      }
+      #clear-button {
+        top: 600px;
+        left: calc(50% + 470px);
+      }
+      /* Back-to-top button styling */
+      #back-to-top {
+        top: 670px;
+        left: calc(50% + 470px);
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
+        padding: 15px 30px;
+        background-color: #353535;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      /* Copyright styling */
+      .copyright {
+        font-size: 12px;
+        color: #ddd;
+        letter-spacing: 2px;
+        text-align: center;
+        margin: 10px 0 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <h1>OVERWATCH 2 UI TEXT VIEWER</h1>
+      </header>
+      <!-- Controller Section -->
+      <div class="control-bar">
+        <h3 class="step-label">Select Your Locale:</h3>
+        <select id="font-selector" class="form-control" onchange="updateAllFonts()">
+          <option value="EkachonRegular">thTH</option>
+          <option value="CustomFont2">Custom Font 2</option>
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Georgia">Georgia</option>
+        </select>
+        <span id="selected-font">Selected locale: thTH</span>
+        <h3 class="step-label shortcut">Shortcuts to UI:</h3>
+        <div class="bookmarks">
+          <button type="button" onclick="document.getElementById('group1').scrollIntoView({ behavior: 'smooth' })">Challenge</button>
+          <button type="button" onclick="document.getElementById('group3').scrollIntoView({ behavior: 'smooth' })">Stadium Hero Modifier</button>
+          <button type="button" onclick="document.getElementById('group4').scrollIntoView({ behavior: 'smooth' })">New Group</button>
+          <button type="button" onclick="document.getElementById('group5').scrollIntoView({ behavior: 'smooth' })">Unlock Description</button>
+          <button type="button" onclick="document.getElementById('group6').scrollIntoView({ behavior: 'smooth' })">Banner</button>
+          <button type="button" onclick="document.getElementById('group7').scrollIntoView({ behavior: 'smooth' })">Hero Ability</button>
+          <button type="button" onclick="document.getElementById('group8').scrollIntoView({ behavior: 'smooth' })">Event Hub</button>
+        </div>
+      </div>
+      <div class="canvas-groups">
+        <!-- Group 1: Challenge -->
+        <div class="canvas-group" id="group1">
+          <div class="canvas-item">
+            <canvas id="canvas1"></canvas>
+            <textarea id="textarea1" placeholder="Type here..." oninput="updateText(1)"></textarea>
+            <p class="note">Note: Replace {0} with number i.e. Complete 10 games..., Deal 30,000 damage...</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 2: challengeUI_TwoRewards -->
+        <div class="canvas-group" id="group2">
+          <div class="canvas-item">
+            <canvas id="canvas2"></canvas>
+            <textarea id="textarea2" placeholder="Type here..." oninput="updateText(2)"></textarea>
+            <p class="note">Note: Replace {0} with number i.e. Complete 10 games..., Deal 30,000 damage...</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 3: Stadium Hero Modifier -->
+        <div class="canvas-group" id="group3">
+          <div class="canvas-item">
+            <canvas id="canvas3"></canvas>
+            <textarea id="textarea3_name" placeholder="Type here..." oninput="updateText(3)" style="height: 30px;"></textarea>
+            <textarea id="textarea3_desc" placeholder="Type here..." oninput="updateText(3)" style="height: 30px;"></textarea>
+            <p class="note">Note: Replace {0} with number i.e. gain 50 Overhealth..., take 10% less damage.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 4: New Group (Duplicate of Group 3 layout with extra text inputs and modified coordinates) -->
+        <div class="canvas-group" id="group4">
+          <div class="canvas-item">
+            <canvas id="canvas4"></canvas>
+            <!-- Top text input for Group 4: drawn with 19px font at x = 23, y = 40 -->
+            <textarea id="textarea4_name" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
+            <!-- Two extra text input boxes for Group 4 -->
+            <textarea id="textarea4_subStatus1" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
+            <textarea id="textarea4_subStatus2" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
+            <!-- Bottom text input for Group 4 -->
+            <textarea id="textarea4_desc" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
+            <p class="note">Note: Replace {0} with number i.e. gain 50 Overhealth..., take 10% less damage.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 5: Unlock Description -->
+        <div class="canvas-group" id="group5">
+          <div class="canvas-item">
+            <canvas id="canvas5"></canvas>
+            <textarea id="textarea5" placeholder="Type here..." oninput="updateText(5)"></textarea>
+            <p class="note">Note: Unlock Description text goes here.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 6: Banner -->
+        <div class="canvas-group" id="group6">
+          <div class="canvas-item">
+            <canvas id="canvas6"></canvas>
+            <textarea id="textarea6" placeholder="Type here..." oninput="updateText(6)"></textarea>
+            <p class="note">Note: Banner text goes here.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 7: Hero Ability -->
+        <div class="canvas-group" id="group7">
+          <div class="canvas-item">
+            <canvas id="canvas7"></canvas>
+            <textarea id="textarea7" placeholder="Type here..." oninput="updateText(7)"></textarea>
+            <p class="note">Note: Hero Ability text goes here.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+        <!-- Group 8: Event Hub -->
+        <div class="canvas-group" id="group8">
+          <div class="canvas-item">
+            <canvas id="canvas8"></canvas>
+            <textarea id="textarea8" placeholder="Type here..." oninput="updateText(8)"></textarea>
+            <p class="note">Note: Event Hub text goes here.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
+      </div>
+    </div>
+    <!-- Copyright -->
+    <div class="copyright">
+      POWERED  by TWSEA Localization
+    </div>
+    <button id="clear-button" onclick="clearAllText()">CLEAR ALL TEXT</button>
+    <a href="#" id="back-to-top" onclick="scrollToTop(); return false;">BACK TO TOP</a>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+      // Helper function to sanitize text inputs.
+      function sanitizeText(text) {
+        return text.replace(/<fg#ffffffff>/gi, "").replace(/<\/fg>/gi, "");
+      }
+      
+      // Image sources for 8 groups.
+      const imageSources = [
+        "static/images/challengeUI.png",               // Group 1
+        "static/images/challengeUI_TwoRewards.png",      // Group 2
+        "static/images/StadiumHeroModthTH.PNG",          // Group 3
+        "static/images/StadiumHeroModGeneric.png",       // Group 4
+        "static/images/unlockDescription.png",           // Group 5
+        "static/images/banner.png",                      // Group 6
+        "static/images/heroAbility.png",                 // Group 7
+        "static/images/eventHub.png"                     // Group 8
+      ];
+      
+      const canvases = [];
+      const contexts = [];
+      const images = [];
+      let globalFont = "EkachonRegular";
+      
+      function updateSelectedFontLabel() {
+        const selector = document.getElementById("font-selector");
+        const selectedText = selector.options[selector.selectedIndex].text;
+        document.getElementById("selected-font").innerText = `Selected locale: ${selectedText}`;
+      }
+      
+      imageSources.forEach((src, index) => {
+        const canvas = document.getElementById(`canvas${index + 1}`);
+        const ctx = canvas.getContext("2d");
+        if (index === 2) { // Group 3
+          const textareaName = document.getElementById("textarea3_name");
+          const textareaDesc = document.getElementById("textarea3_desc");
+          canvases.push(canvas);
+          contexts.push(ctx);
+          const img = new Image();
+          img.src = src;
+          img.onerror = function() {
+            img.src = "static/images/imageError.png";
+          };
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            if (textareaName) {
+              textareaName.style.width = `${img.width * 1.5}px`;
+              textareaName.style.height = "30px";
+              textareaName.style.fontFamily = globalFont;
+            }
+            if (textareaDesc) {
+              textareaDesc.style.width = `${img.width * 1.5}px`;
+              textareaDesc.style.height = `${img.height}px`;
+              textareaDesc.style.fontFamily = globalFont;
+            }
+          };
+          images.push(img);
+        } else if (index === 3) { // Group 4
+          const textareaName = document.getElementById("textarea4_name");
+          const textareaSubStatus1 = document.getElementById("textarea4_subStatus1");
+          const textareaSubStatus2 = document.getElementById("textarea4_subStatus2");
+          const textareaDesc = document.getElementById("textarea4_desc");
+          canvases.push(canvas);
+          contexts.push(ctx);
+          const img = new Image();
+          img.src = src;
+          img.onerror = function() {
+            img.src = "static/images/imageError.png";
+          };
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            if (textareaName) {
+              textareaName.style.width = `${img.width * 1.5}px`;
+              textareaName.style.height = "30px";
+              textareaName.style.fontFamily = globalFont;
+            }
+            if (textareaSubStatus1) {
+              textareaSubStatus1.style.width = `${img.width * 1.5}px`;
+              textareaSubStatus1.style.height = "30px";
+              textareaSubStatus1.style.fontFamily = globalFont;
+            }
+            if (textareaSubStatus2) {
+              textareaSubStatus2.style.width = `${img.width * 1.5}px`;
+              textareaSubStatus2.style.height = "30px";
+              textareaSubStatus2.style.fontFamily = globalFont;
+            }
+            if (textareaDesc) {
+              textareaDesc.style.width = `${img.width * 1.5}px`;
+              textareaDesc.style.height = `${img.height}px`;
+              textareaDesc.style.fontFamily = globalFont;
+            }
+          };
+          images.push(img);
+        } else {
+          const textarea = document.getElementById(`textarea${index + 1}`);
+          canvases.push(canvas);
+          contexts.push(ctx);
+          const img = new Image();
+          img.src = src;
+          img.onerror = function() {
+            img.src = "static/images/imageError.png";
+          };
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            if (textarea) {
+              textarea.style.width = `${img.width}px`;
+              textarea.style.height = `${img.height}px`;
+              textarea.style.fontFamily = globalFont;
+            }
+          };
+          images.push(img);
+        }
+      });
+      
+      // Standard wrapText function (without letter spacing)
+      function wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing) {
+        if (!letterSpacing) {
+          const lines = text.split("\n");
+          for (let i = 0; i < lines.length; i++) {
+            let words = lines[i].split(" ");
+            let line = "";
+            for (let n = 0; n < words.length; n++) {
+              let testLine = line + words[n] + " ";
+              let metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && n > 0) {
+                ctx.fillText(line, x, y);
+                line = words[n] + " ";
+                y += lineHeight;
+              } else {
+                line = testLine;
+              }
+            }
+            ctx.fillText(line, x, y);
+            y += lineHeight;
+          }
+        } else {
+          const lines = text.split("\n");
+          for (let i = 0; i < lines.length; i++) {
+            let words = lines[i].split(" ");
+            let line = "";
+            for (let n = 0; n < words.length; n++) {
+              let testLine = line + words[n] + " ";
+              let trimmed = testLine.trim();
+              let effectiveWidth = ctx.measureText(trimmed).width + letterSpacing * (trimmed.length - 1);
+              if (effectiveWidth > maxWidth && n > 0) {
+                drawTextWithSpacing(ctx, line.trim(), x, y, letterSpacing);
+                line = words[n] + " ";
+                y += lineHeight;
+              } else {
+                line = testLine;
+              }
+            }
+            drawTextWithSpacing(ctx, line.trim(), x, y, letterSpacing);
+            y += lineHeight;
+          }
+        }
+      }
+      
+      // Helper for drawing text with letter spacing.
+      function drawTextWithSpacing(ctx, text, x, y, letterSpacing) {
+        for (let i = 0; i < text.length; i++) {
+          let char = text[i];
+          ctx.fillText(char, x, y);
+          x += ctx.measureText(char).width + letterSpacing;
+        }
+      }
+      
+      function updateText(groupIndex) {
+        const ctx = contexts[groupIndex - 1];
+        const img = images[groupIndex - 1];
+        ctx.drawImage(img, 0, 0);
+        let x, y, lineHeight, letterSpacing;
+        if (groupIndex === 1 || groupIndex === 2) {
+          // For Groups 1 and 2, use 17px font, line height 22.
+          ctx.font = `17px ${globalFont}`;
+          x = 172;
+          y = 63;
+          lineHeight = 22;
+          letterSpacing = 0;
+          ctx.fillStyle = "white";
+          let text = sanitizeText(document.getElementById(`textarea${groupIndex}`).value);
+          let maxWidth = canvases[groupIndex - 1].width - 172;
+          wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing);
+        } else if (groupIndex === 3 || groupIndex === 4) {
+          let topInputId, bottomInputId;
+          if (groupIndex === 3) {
+            topInputId = "textarea3_name";
+            bottomInputId = "textarea3_desc";
+            ctx.font = `19px ${globalFont}`;
+            letterSpacing = 0;
+            lineHeight = 23;
+            ctx.fillStyle = "white";
+            let topText = sanitizeText(document.getElementById(topInputId).value);
+            let maxWidthTop = canvases[groupIndex - 1].width - 95;
+            wrapText(ctx, topText, 95, 54, maxWidthTop, lineHeight, letterSpacing);
+            ctx.font = `17px ${globalFont}`;
+            letterSpacing = 0;
+            lineHeight = 20;
+            let bottomText = sanitizeText(document.getElementById(bottomInputId).value);
+            let maxWidthBottom = canvases[groupIndex - 1].width - 30;
+            wrapText(ctx, bottomText, 30, 106, maxWidthBottom, lineHeight, letterSpacing);
+          } else { // Group 4
+            topInputId = "textarea4_name";
+            bottomInputId = "textarea4_desc";
+            // Group 4 top text: 19px at x = 23, y = 40.
+            ctx.font = `19px ${globalFont}`;
+            letterSpacing = 0;
+            lineHeight = 23;
+            ctx.fillStyle = "white";
+            let topText = sanitizeText(document.getElementById(topInputId).value);
+            let maxWidthTop = canvases[groupIndex - 1].width - 23;
+            wrapText(ctx, topText, 23, 40, maxWidthTop, lineHeight, letterSpacing);
+            // Extra sub-status texts for Group 4 with 17px font, line height 24.
+            ctx.font = `17px ${globalFont}`;
+            letterSpacing = 0;
+            lineHeight = 24;
+            // textarea4_subStatus1: x = 88, y = 83.
+            let extra1 = sanitizeText(document.getElementById("textarea4_subStatus1").value);
+            let maxWidthExtra1 = canvases[groupIndex - 1].width - 88;
+            wrapText(ctx, extra1, 88, 83, maxWidthExtra1, lineHeight, letterSpacing);
+            // textarea4_subStatus2: x = 88, y = 112.
+            let extra2 = sanitizeText(document.getElementById("textarea4_subStatus2").value);
+            let maxWidthExtra2 = canvases[groupIndex - 1].width - 88;
+            wrapText(ctx, extra2, 88, 112, maxWidthExtra2, lineHeight, letterSpacing);
+            // Group 4 bottom text: 17px at x = 23, y = 166 with line height 24.
+            ctx.font = `17px ${globalFont}`;
+            letterSpacing = 0;
+            lineHeight = 24;
+            let bottomText = sanitizeText(document.getElementById(bottomInputId).value);
+            let maxWidthBottom = canvases[groupIndex - 1].width - 23;
+            wrapText(ctx, bottomText, 23, 166, maxWidthBottom, lineHeight, letterSpacing);
+          }
+        } else {
+          ctx.font = `14px ${globalFont}`;
+          x = 20;
+          y = 30;
+          lineHeight = 25;
+          letterSpacing = 0;
+          ctx.fillStyle = "white";
+          let text = sanitizeText(document.getElementById(`textarea${groupIndex}`).value);
+          let maxWidth = canvases[groupIndex - 1].width - 40;
+          wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing);
+        }
+      }
+      
+      function updateAllFonts() {
+        const selector = document.getElementById("font-selector");
+        globalFont = selector.value;
+        updateSelectedFontLabel();
+        for (let i = 1; i <= imageSources.length; i++) {
+          if (i === 3 || i === 4) {
+            let topId = i === 3 ? "textarea3_name" : "textarea4_name";
+            let bottomId = i === 3 ? "textarea3_desc" : "textarea4_desc";
+            document.getElementById(topId).style.fontFamily = globalFont;
+            document.getElementById(bottomId).style.fontFamily = globalFont;
+            if (i === 4) {
+              document.getElementById("textarea4_subStatus1").style.fontFamily = globalFont;
+              document.getElementById("textarea4_subStatus2").style.fontFamily = globalFont;
+            }
+          } else {
+            document.getElementById(`textarea${i}`).style.fontFamily = globalFont;
+          }
+          updateText(i);
+        }
+      }
+      
+      function clearAllText() {
+        for (let i = 1; i <= imageSources.length; i++) {
+          if (i === 3 || i === 4) {
+            let topId = i === 3 ? "textarea3_name" : "textarea4_name";
+            let bottomId = i === 3 ? "textarea3_desc" : "textarea4_desc";
+            document.getElementById(topId).value = "";
+            document.getElementById(bottomId).value = "";
+            if (i === 4) {
+              document.getElementById("textarea4_subStatus1").value = "";
+              document.getElementById("textarea4_subStatus2").value = "";
+            }
+          } else {
+            document.getElementById(`textarea${i}`).value = "";
+          }
+        }
+        images.forEach((img, index) => {
+          const ctx = contexts[index];
+          ctx.clearRect(0, 0, canvases[index].width, canvases[index].height);
+          ctx.drawImage(img, 0, 0);
+        });
+      }
+      
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      
+      function sanitizeText(text) {
+        return text.replace(/<fg#ffffffff>/gi, "").replace(/<\/fg>/gi, "");
+      }
+    </script>
+  </body>
+</html>
