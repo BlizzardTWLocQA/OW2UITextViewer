@@ -88,7 +88,7 @@
         margin-bottom: 20px;
         text-align: center;
       }
-      /* Bookmarks container styling (with Group 4 bookmark included) */
+      /* Bookmarks container styling (Group 4 button removed) */
       .control-bar .bookmarks {
         display: flex;
         flex-wrap: wrap;
@@ -133,7 +133,7 @@
         font-size: 14px;
         margin: 10px auto;
       }
-      /* Textarea styling */
+      /* Textarea styling with updated placeholder text */
       textarea {
         font-size: 18px;
         display: block;
@@ -145,9 +145,8 @@
         overflow: hidden;
         box-sizing: border-box;
         font-family: "EkachonRegular";
-        /* Updated all placeholder texts to "Type here..." */
-        placeholder: "Type here...";
       }
+      /* All placeholders are set in HTML attributes below to "Type here..." */
       /* Canvas styling */
       canvas {
         border: 2px solid black;
@@ -219,7 +218,7 @@
         <div class="bookmarks">
           <button type="button" onclick="document.getElementById('group1').scrollIntoView({ behavior: 'smooth' })">Challenge</button>
           <button type="button" onclick="document.getElementById('group3').scrollIntoView({ behavior: 'smooth' })">Stadium Hero Modifier</button>
-          <button type="button" onclick="document.getElementById('group4').scrollIntoView({ behavior: 'smooth' })">New Group</button>
+          <!-- Group 4 bookmark removed -->
           <button type="button" onclick="document.getElementById('group5').scrollIntoView({ behavior: 'smooth' })">Unlock Description</button>
           <button type="button" onclick="document.getElementById('group6').scrollIntoView({ behavior: 'smooth' })">Banner</button>
           <button type="button" onclick="document.getElementById('group7').scrollIntoView({ behavior: 'smooth' })">Hero Ability</button>
@@ -255,11 +254,11 @@
           </div>
           <hr class="group-divider">
         </div>
-        <!-- Group 4: New Group (Duplicate of Group 3 layout with extra text inputs and modified coordinates) -->
+        <!-- Group 4: New Group (Duplicate of Group 3 with extra text inputs and modified coordinates) -->
         <div class="canvas-group" id="group4">
           <div class="canvas-item">
             <canvas id="canvas4"></canvas>
-            <!-- Top text input for Group 4: drawn with 19px font at x = 23, y = 40 -->
+            <!-- Top text input for Group 4 -->
             <textarea id="textarea4_name" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
             <!-- Two extra text input boxes for Group 4 -->
             <textarea id="textarea4_subStatus1" placeholder="Type here..." oninput="updateText(4)" style="height: 30px;"></textarea>
@@ -355,9 +354,7 @@
           contexts.push(ctx);
           const img = new Image();
           img.src = src;
-          img.onerror = function() {
-            img.src = "static/images/imageError.png";
-          };
+          img.onerror = function() { img.src = "static/images/imageError.png"; };
           img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
@@ -383,9 +380,7 @@
           contexts.push(ctx);
           const img = new Image();
           img.src = src;
-          img.onerror = function() {
-            img.src = "static/images/imageError.png";
-          };
+          img.onerror = function() { img.src = "static/images/imageError.png"; };
           img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
@@ -418,9 +413,7 @@
           contexts.push(ctx);
           const img = new Image();
           img.src = src;
-          img.onerror = function() {
-            img.src = "static/images/imageError.png";
-          };
+          img.onerror = function() { img.src = "static/images/imageError.png"; };
           img.onload = () => {
             canvas.width = img.width;
             canvas.height = img.height;
@@ -533,7 +526,7 @@
             let topText = sanitizeText(document.getElementById(topInputId).value);
             let maxWidthTop = canvases[groupIndex - 1].width - 23;
             wrapText(ctx, topText, 23, 40, maxWidthTop, lineHeight, letterSpacing);
-            // Extra sub-status texts for Group 4 with 17px font, line height 24.
+            // Extra sub-status texts for Group 4:
             ctx.font = `17px ${globalFont}`;
             letterSpacing = 0;
             lineHeight = 24;
@@ -545,7 +538,7 @@
             let extra2 = sanitizeText(document.getElementById("textarea4_subStatus2").value);
             let maxWidthExtra2 = canvases[groupIndex - 1].width - 88;
             wrapText(ctx, extra2, 88, 112, maxWidthExtra2, lineHeight, letterSpacing);
-            // Group 4 bottom text: 17px at x = 23, y = 166 with line height 24.
+            // Group 4 bottom text: 17px at x = 23, y = 166, line height = 24.
             ctx.font = `17px ${globalFont}`;
             letterSpacing = 0;
             lineHeight = 24;
