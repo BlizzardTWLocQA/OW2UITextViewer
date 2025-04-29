@@ -206,18 +206,25 @@
         <h3 class="step-label">Select Your Locale:</h3>
         <select id="font-selector" class="form-control" onchange="updateAllFonts()">
           <option value="EkachonRegular">thTH</option>
+          <option value="CustomFont2">Custom Font 2</option>
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Georgia">Georgia</option>
         </select>
         <span id="selected-font">Selected locale: thTH</span>
         <h3 class="step-label shortcut">Shortcuts to UI:</h3>
         <div class="bookmarks">
           <button type="button" onclick="document.getElementById('group1').scrollIntoView({ behavior: 'smooth' })">Challenge</button>
           <button type="button" onclick="document.getElementById('group3').scrollIntoView({ behavior: 'smooth' })">Stadium Hero Modifier</button>
-          <!-- Group 4 bookmark removed -->
           <button type="button" onclick="document.getElementById('group5').scrollIntoView({ behavior: 'smooth' })">Unlock Description</button>
           <button type="button" onclick="document.getElementById('group6').scrollIntoView({ behavior: 'smooth' })">Banner</button>
           <button type="button" onclick="document.getElementById('group7').scrollIntoView({ behavior: 'smooth' })">Hero Ability</button>
           <button type="button" onclick="document.getElementById('group8').scrollIntoView({ behavior: 'smooth' })">Event Hub</button>
+          <button type="button" onclick="document.getElementById('group9').scrollIntoView({ behavior: 'smooth' })">Hero Gallery</button>
         </div>
+        
       </div>
       <div class="canvas-groups">
         <!-- Group 1: Challenge -->
@@ -299,6 +306,15 @@
           </div>
           <hr class="group-divider">
         </div>
+        <!-- Group 9: Hero Gallery -->
+        <div class="canvas-group" id="group9">
+          <div class="canvas-item">
+            <canvas id="canvas9"></canvas>
+            <textarea id="textarea9" placeholder="Type here..." oninput="updateText(9)"></textarea>
+            <p class="note">Note: Hero Gallery text goes here.</p>
+          </div>
+          <hr class="group-divider">
+        </div>
       </div>
     </div>
     <!-- Copyright -->
@@ -324,7 +340,8 @@
         "static/images/unlockDescription.png",           // Group 5
         "static/images/banner.png",                      // Group 6
         "static/images/heroAbility.png",                 // Group 7
-        "static/images/eventHub.png"                     // Group 8
+        "static/images/eventHub.png",                     // Group 8
+        "static/images/heroGallery.png"              // Group 9 
       ];
       
       const canvases = [];
@@ -491,7 +508,7 @@
           let text = sanitizeText(document.getElementById(`textarea${groupIndex}`).value);
           let maxWidth = canvases[groupIndex - 1].width - 172;
           wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing);
-        } else if (groupIndex === 3 || groupIndex === 4) {
+        } else if (groupIndex === 3 || groupIndex === 4 || groupIndex === 9) {
           let topInputId, bottomInputId;
           if (groupIndex === 3) {
             topInputId = "textarea3_name";
@@ -509,7 +526,8 @@
             let bottomText = sanitizeText(document.getElementById(bottomInputId).value);
             let maxWidthBottom = canvases[groupIndex - 1].width - 30;
             wrapText(ctx, bottomText, 30, 106, maxWidthBottom, lineHeight, letterSpacing);
-          } else { // Group 4
+          } 
+          else if (groupIndex === 4) { // Group 4
             topInputId = "textarea4_name";
             bottomInputId = "textarea4_desc";
             // Group 4 top text: 19px at x = 23, y = 40.
@@ -539,6 +557,31 @@
             let bottomText = sanitizeText(document.getElementById(bottomInputId).value);
             let maxWidthBottom = canvases[groupIndex - 1].width - 23;
             wrapText(ctx, bottomText, 23, 166, maxWidthBottom, lineHeight, letterSpacing);
+          }
+
+          else if (groupIndex === 9) {
+            // Hero Gallery uses an 18px font size.
+            ctx.font = `18px ${globalFont}`;
+            x = 60;
+            y = 60;
+            lineHeight = 25;
+            letterSpacing = 0;
+            let text = sanitizeText(document.getElementById(`textarea${groupIndex}`).value);
+            let maxWidth = canvases[groupIndex - 1].width - x;
+            wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing);
+
+          }
+
+          else {
+            ctx.font = `14px ${globalFont}`;
+            x = 20;
+            y = 30;
+            lineHeight = 25;
+            letterSpacing = 0;
+            ctx.fillStyle = "white";
+            let text = sanitizeText(document.getElementById(`textarea${groupIndex}`).value);
+            let maxWidth = canvases[groupIndex - 1].width - 40;
+            wrapText(ctx, text, x, y, maxWidth, lineHeight, letterSpacing);
           }
         } else {
           ctx.font = `14px ${globalFont}`;
@@ -601,8 +644,15 @@
       }
       
       function sanitizeText(text) {
-        return text.replace(/<fg#ffffffff>/gi, "").replace(/<\/fg>/gi, "");
+        return text
+          .replace(/<fg#ffffffff>/gi, "")
+          .replace(/<\/fg>/gi, "")
+          .replace(/<fg#ff5864eb>/gi, "")
+          .replace(/<fg#ff9274ff>/gi, "")
+          .replace(/<fg#ffDA3232>/gi, "")
+          .replace(/<tx0x0C000000[A-Za-z0-9]{8}>/gi, "");
       }
+
     </script>
   </body>
 </html>
